@@ -1013,7 +1013,7 @@ let MENU = {}; // will be populated dynamically from the Sheet
 // Fetch menu data from your Google Sheet API
 async function fetchMenu() {
   try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbw42pVkbMnN86Od3jQ7DVu_G0moqdq-rsARxvfIqwANYUsCz-ZBQor2CoUbee1xiDJC7A/exec");
+    const res = await fetch("https://script.google.com/macros/s/AKfycbw42pVkbMnN86Od3jQ7DVu_G0moqdq-rsARxvfIqwANYUsCz-ZBQor2CoUbee1xiDJC7A/exec?apiKey=" + API_KEY);
     const data = await res.json();
 
     MENU = {}; // reset
