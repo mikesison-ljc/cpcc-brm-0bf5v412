@@ -459,10 +459,12 @@ body.history-open #historyContainer {
 /* ===== TERMINAL LOCK ===== */
 
 const API_KEY = "CPCC_LJC_2026_PRIVATE_KEY";
-const TERMINAL_URL = "https://script.google.com/macros/s/AKfycbygRs4mBFfl2iscDkO0_uozlwgkbnvbqMvo7TdU6IbfCnNVzPiFnFfAtjcF3TlHb1COGg/exec";
+const TERMINAL_URL = "https://script.google.com/macros/s/AKfycbyCNFUgz9e8Xubl4kQpQw8W9iP-vFSzJvZUV88u7Mlg8Gswr_veBzpgQM-pTGH0kbebeg/exec";
 
 const TERMINAL_ID = "ABE_TRINOMA_POS01";
 const FIXED_OUTLET = "ABE Trinoma";
+
+/* ============================= */
 
 function showScreen(msg) {
   document.body.innerHTML = `
@@ -479,14 +481,14 @@ async function checkTerminal() {
     const res = await fetch(url, { method: "GET" });
 
     if (!res.ok) {
-      throw new Error("HTTP " + res.status);
+      throw new Error("HTTP_" + res.status);
     }
 
-    const text = await res.text();
+    const raw = await res.text();
 
     let payload;
     try {
-      payload = JSON.parse(text);
+      payload = JSON.parse(raw);
     } catch {
       throw new Error("INVALID_JSON");
     }
@@ -495,10 +497,10 @@ async function checkTerminal() {
       throw new Error(payload.error || "SERVER_ERROR");
     }
 
-    const data = payload.terminals;
+    const list = payload.terminals;
     const today = new Date();
 
-    const row = data.find(r =>
+    const row = list.find(r =>
       r.outlet === FIXED_OUTLET &&
       r.terminal === TERMINAL_ID &&
       r.active === "Y" &&
@@ -506,23 +508,22 @@ async function checkTerminal() {
     );
 
     if (!row) {
-      showScreen(`TERMINAL DISABLED<br><br>Contact Head Office`);
+      showScreen("TERMINAL DISABLED<br><br>Contact Head Office");
       throw "TERMINAL_DISABLED";
     }
 
-    // ✅ terminal valid → app continues loading
-    console.log("Terminal OK");
+    console.log("✅ Terminal validated");
 
-  } catch (e) {
+  } catch (err) {
     showScreen("LICENSE SERVER UNREACHABLE");
-    console.error("Terminal check failed:", e);
-    throw e;
+    console.error("❌ Terminal check failed:", err);
+    throw err;
   }
 }
 
-/* ========================= */
-/* 🚀 INIT                   */
-/* ========================= */
+/* ============================= */
+/* 🚀 INIT                       */
+/* ============================= */
 (async () => {
   await checkTerminal();
 })();
