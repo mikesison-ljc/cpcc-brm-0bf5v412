@@ -458,12 +458,20 @@ body.history-open #historyContainer {
 
 /* ===== TERMINAL LOCK ===== */
 
-const TERMINAL_ID = "ABE_TRINOMA_POS01";
-const LICENSE_URL = "https://script.google.com/macros/s/AKfycbzSd8DwwPZIXCfBmPobS2OYaLi6pQTo2G2Rh1b4Le1b6FOh2Qd4ElEXl11geHpajY13Zw/exec";
+// =========================
+// 🔑 CONFIG
+// =========================
+const API_KEY = "CPCC_LJC_2026_PRIVATE_KEY";
+const TERMINAL_ID = "ABE_TRINOMA_POS01";  // keep this for terminal check
+const FIXED_OUTLET = "ABE TRINOMA";           // adjust to your outlet
+const TERMINAL_URL = "https://script.google.com/macros/s/AKfycby_SmOUHCIh99bWTWWF8OeJEV6UhHCBQBGnCcHHJ5MjVRLCNshlNrKnFd6GR1JPahpbiw/exec";
 
-async function checkTerminal(){
-  try{
-    const res = await fetch(LICENSE_URL);
+// =========================
+// 📡 TERMINAL CHECK
+// =========================
+async function checkTerminal() {
+  try {
+    const res = await fetch(`${TERMINAL_URL}?apiKey=${API_KEY}`);
     const data = await res.json();
 
     const today = new Date();
@@ -475,7 +483,7 @@ async function checkTerminal(){
       (!r.expiry || new Date(r.expiry) >= today)
     );
 
-    if(!row){
+    if (!row) {
       document.body.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:center;
                     height:100vh;background:#111;color:white;
@@ -485,7 +493,8 @@ async function checkTerminal(){
         </div>`;
       throw "TERMINAL_DISABLED";
     }
-  }catch(e){
+
+  } catch (e) {
     document.body.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;
                   height:100vh;background:#111;color:white;
@@ -496,10 +505,42 @@ async function checkTerminal(){
   }
 }
 
+// =========================
+// 🔐 PIN VALIDATION (via GET)
+// =========================
+async function validatePin() {
+  const pin = document.getElementById("pinInput").value;
 
+  try {
+    // Use GET instead of POST to avoid doPost CORS issues
+    const url = `${TERMINAL_URL}?apiKey=${API_KEY}&action=validatePin&pin=${pin}`;
+    const res = await fetch(url);
+    const result = await res.json();
 
-const FIXED_OUTLET = "ABE Trinoma";
-let CUSTOMER_LIMITS = {};
+    if (result.valid) {
+      document.getElementById("pinModal").style.display = "none";
+      startApp(); // system starts after correct PIN
+    } else {
+      alert("Incorrect PIN!");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error. Try again.");
+  }
+}
+
+// =========================
+// 📌 EVENT LISTENER
+// =========================
+document.getElementById("pinSubmit").addEventListener("click", validatePin);
+
+// =========================
+// 🚀 INIT
+// =========================
+(async () => {
+  await checkTerminal(); // first, verify terminal is active
+})();
 
 
 /* ===== DATA ===== */
@@ -956,8 +997,6 @@ async function fetchHistory(){
   alert("Failed to fetch history");
 }
 }
-
-const API_KEY = "CPCC_LJC_2026_PRIVATE_KEY";
 
 async function validatePin() {
   const pin = document.getElementById("pinInput").value;
