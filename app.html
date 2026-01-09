@@ -563,9 +563,33 @@ document
   .addEventListener("click", validatePin);
 </script>
 
-
 <script>
+/* ===== DOM REFERENCES ===== */
+const customerSelect = document.getElementById("customerSelect");
+const customerOther  = document.getElementById("customerOther");
+const cpcc           = document.getElementById("cpcc");
+const date           = document.getElementById("date");
+const remarks        = document.getElementById("remarks");
+const orderList      = document.getElementById("orderList");
+const total          = document.getElementById("total");
+const categories     = document.getElementById("categories");
+const menuGrid       = document.getElementById("menuGrid");
+const backBtn        = document.getElementById("backBtn");
+const excessReceipt  = document.getElementById("excessReceipt");
+const receiptNumber  = document.getElementById("receiptNumber");
+const historyBody    = document.getElementById("historyBody");
+const numpad         = document.getElementById("numpad");
+const keyboard       = document.getElementById("keyboard");
+
+/* ===== DATA ===== */
+let CUSTOMER_LIMITS = {};
+
+
+</script>
+
+
   
+<script> 
 /* ===== DATA ===== */
 let cart = {};
 let liveCPCCUsed = null;
@@ -1023,7 +1047,6 @@ async function fetchHistory(){
 
 </script>
 
-<script>
 <script>
 async function startApp() {
   await Promise.all([
