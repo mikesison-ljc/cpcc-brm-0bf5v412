@@ -455,10 +455,11 @@ body.history-open #historyContainer {
 </div>
 
 <script>
-/* ===== TERMINAL LOCK ===== */
+/* ===== SECURITY FLOW ===== */
 
 const API_KEY = "CPCC_LJC_2026_PRIVATE_KEY";
-const TERMINAL_URL = "https://script.google.com/macros/s/AKfycbwjd_rwS-REwzCWiOC9mUIwjLLcEwAk6ZEfZSUKEDMJt_uDRbNpQmWeOYUdDjNMo3VHNg/exec";
+const TERMINAL_URL =
+  "https://script.googleusercontent.com/macros/echo?user_content_key=YOUR_KEY&lib=ME8dJh_rtcTl_DemXw9PnLyotalv22-V1";
 
 const TERMINAL_ID = "ABE_TRINOMA_POS01";
 const FIXED_OUTLET = "ABE Trinoma";
@@ -475,18 +476,14 @@ function showScreen(msg) {
 }
 
 /* ============================= */
-/* JSONP CALLBACK                */
+/* TERMINAL CHECK (JSONP)        */
 /* ============================= */
 function terminalCallback(payload) {
   try {
-    if (!payload.ok) {
-      throw payload.error || "SERVER_ERROR";
-    }
+    if (!payload.ok) throw "SERVER_ERROR";
 
-    const list = payload.terminals;
     const today = new Date();
-
-    const row = list.find(r =>
+    const row = payload.terminals.find(r =>
       r.outlet === FIXED_OUTLET &&
       r.terminal === TERMINAL_ID &&
       r.active === "Y" &&
@@ -499,30 +496,29 @@ function terminalCallback(payload) {
     }
 
     console.log("✅ Terminal validated");
+    // show PIN screen only AFTER terminal is valid
+    document.getElementById("pinModal").style.display = "flex";
 
-  } catch (err) {
+  } catch {
     showScreen("LICENSE SERVER UNREACHABLE");
-    console.error("❌ Terminal check failed:", err);
   }
 }
 
 /* ============================= */
-/* LOAD JSONP                    */
+/* LOAD TERMINAL CHECK           */
 /* ============================= */
 (function () {
   const s = document.createElement("script");
   s.src =
     TERMINAL_URL +
-    "?apiKey=" + encodeURIComponent(API_KEY) +
+    "&apiKey=" + encodeURIComponent(API_KEY) +
     "&callback=terminalCallback";
 
-  s.onerror = () => {
-    showScreen("LICENSE SERVER UNREACHABLE");
-  };
-
+  s.onerror = () => showScreen("LICENSE SERVER UNREACHABLE");
   document.head.appendChild(s);
 })();
 </script>
+
 
 <script>
 /* ===== DATA ===== */
@@ -980,52 +976,52 @@ async function fetchHistory(){
 }
 }
 
-async function validatePin() {
+<script>
+/* ===== PIN VALIDATION (JSONP) ===== */
+const PIN_USER_KEY = "AehSKLiFJkqeNvE4r5aeBtlNFzwCdusor11J6C59AWP-OWRUB21bCS3hPshHp_fXAZSDp9Ez7jdGePbnBtXT9A6xGM5Y0F0bMLPnTWtbiBRhAVf_BEP5nDIEj1sZDqKJ4unP0FgOFw0fyOwjMWp3Ilh4j24VrB_y_nKzKVv-3nO5gh6gVyYtJ4QjdDrl9dc7J01imliGUE7lInpniik9BiKuXztQ5luyN0PVxpB6Mf-TpS5Jsp_UWKgZGMzGUQBdEfBWvXyr9eCxox6jcvcF0_-IJz6NYs9qD1Zj6yj_yy7I";
+const PIN_LIB_ID   = "ME8dJh_rtcTl_DemXw9PnLyotalv22-V1";
+  
+function terminalPinCallback(res) {
+  if (res.valid) {
+    document.getElementById("pinModal").style.display = "none";
+    startApp();
+  } else {
+    alert("Incorrect PIN!");
+  }
+}
+
+function validatePin() {
   const pin = document.getElementById("pinInput").value;
 
-  try {
-    const response = await fetch(
-      "https://script.google.com/macros/s/AKfycbzwfSebBviyJs9P_ElKf_cgoOB8X_-Jupbe52WVzUFeetlGgJ64TwgSRXOlLAH7zKPb/exec",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "validatePin",
-          pin: pin,
-          apiKey: API_KEY
-        })
-      }
-    );
+  const s = document.createElement("script");
+  s.src =
+    "https://script.googleusercontent.com/macros/echo" +
+    "?user_content_key=" + PIN_USER_KEY +
+    "&lib=" + PIN_LIB_ID +
+    "&action=validatePin" +
+    "&pin=" + encodeURIComponent(pin) +
+    "&apiKey=" + encodeURIComponent(API_KEY) +
+    "&callback=terminalPinCallback";
 
-    const result = await response.json();
-
-    if (result.valid) {
-      document.getElementById("pinModal").style.display = "none";
-      startApp();
-    } else {
-      alert("Incorrect PIN!");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Server error. Try again.");
-  }
+  s.onerror = () => alert("PIN server unreachable");
+  document.head.appendChild(s);
 }
 
 document
   .getElementById("pinSubmit")
   .addEventListener("click", validatePin);
 
+</script>
 
-// Move the previous init into a separate function
+
+<script>
 async function startApp() {
-  await checkTerminal(); // 🔐 MUST finish first
-
-  // 🚀 Load independent data in parallel
   await Promise.all([
     fetchCPCCUsers(),
     fetchMenu()
   ]);
 }
+</script>
 
 
 /* ===== INIT ===== */
@@ -1168,16 +1164,6 @@ cpcc.addEventListener("input", ()=>{
 });
 
 
-// ===== INIT =====
-(async ()=>{
-  await checkTerminal(); // 🔐 MUST finish first
-
-  // 🚀 Load independent data in parallel
-  await Promise.all([
-    fetchCPCCUsers(),
-    fetchMenu()
-  ]);
-})();
 
 
 
