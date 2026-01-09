@@ -455,12 +455,10 @@ body.history-open #historyContainer {
 </div>
 
 <script>
- 
-/* ===== TERMINAL LOCK (JSONP) ===== */
+/* ===== TERMINAL LOCK ===== */
 
 const API_KEY = "CPCC_LJC_2026_PRIVATE_KEY";
-const TERMINAL_URL =
-  "https://script.google.com/macros/s/AKfycbym9Dbu8eleTduaKFc_9Td9rzBgiCwtD4sn4lc5drQhZQlnXvli_UIeFPTjb8JhU5k-uw/exec";
+const TERMINAL_URL = "PASTE_YOUR_NEW_EXEC_URL_HERE";
 
 const TERMINAL_ID = "ABE_TRINOMA_POS01";
 const FIXED_OUTLET = "ABE Trinoma";
@@ -477,15 +475,15 @@ function showScreen(msg) {
 }
 
 /* ============================= */
-/* 🌍 JSONP CALLBACK            */
+/* JSONP CALLBACK                */
 /* ============================= */
 function terminalCallback(payload) {
   try {
-    if (!payload || !payload.ok) {
-      throw payload?.error || "SERVER_ERROR";
+    if (!payload.ok) {
+      throw payload.error || "SERVER_ERROR";
     }
 
-    const list = payload.terminals || [];
+    const list = payload.terminals;
     const today = new Date();
 
     const row = list.find(r =>
@@ -509,24 +507,24 @@ function terminalCallback(payload) {
 }
 
 /* ============================= */
-/* 🚀 LOAD JSONP                */
+/* LOAD JSONP                    */
 /* ============================= */
-(function checkTerminal() {
-  const script = document.createElement("script");
-
-  script.src =
+(function () {
+  const s = document.createElement("script");
+  s.src =
     TERMINAL_URL +
     "?apiKey=" + encodeURIComponent(API_KEY) +
     "&callback=terminalCallback";
 
-  script.onerror = () => {
+  s.onerror = () => {
     showScreen("LICENSE SERVER UNREACHABLE");
   };
 
-  document.head.appendChild(script);
+  document.head.appendChild(s);
 })();
+</script>
 
-
+<script>
 /* ===== DATA ===== */
 
 
