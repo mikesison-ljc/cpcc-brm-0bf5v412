@@ -519,7 +519,15 @@ function terminalCallback(payload) {
 })();
 </script>
 
+
+
 <script>
+
+window.startApp = function() {
+  fetchCPCCUsers();
+  fetchMenu();
+};
+
 /* ============================= */
 /* PIN VALIDATION (JSONP)        */
 /* ============================= */
@@ -1007,36 +1015,37 @@ async function fetchHistory(){
     });
 
 
-  Object.values(grouped).forEach(row => {
-    const d = new Date(row.date);
-    const formattedDate =
-      String(d.getMonth()+1).padStart(2,"0") + "/" +
-      String(d.getDate()).padStart(2,"0") + "/" +
-      String(d.getFullYear()).slice(-2);
+    Object.values(grouped).forEach(row => {
+      const d = new Date(row.date);
+      const formattedDate =
+        String(d.getMonth()+1).padStart(2,"0") + "/" +
+        String(d.getDate()).padStart(2,"0") + "/" +
+        String(d.getFullYear()).slice(-2);
 
-    historyBody.innerHTML += `
-      <tr>
-        <td>${formattedDate}</td>
-        <td>${row.cpcc}</td>
-        <td>${row.customer}</td>
-        <td>₱${row.gross.toFixed(2)}</td>
-        <td>₱${row.cpccAmt.toFixed(2)}</td>
-        <td>₱${row.cash.toFixed(2)}</td>
-        <td>${row.receipt}</td>
-        <td>${row.remarks}</td>   <!-- ✅ -->
-      </tr>
-    `;
-  });
+      historyBody.innerHTML += `
+        <tr>
+          <td>${formattedDate}</td>
+          <td>${row.cpcc}</td>
+          <td>${row.customer}</td>
+          <td>₱${row.gross.toFixed(2)}</td>
+          <td>₱${row.cpccAmt.toFixed(2)}</td>
+          <td>₱${row.cash.toFixed(2)}</td>
+          <td>${row.receipt}</td>
+          <td>${row.remarks}</td>   <!-- ✅ -->
+        </tr>
+      `;
+    });
 
-  // ✅ ADD THIS BLOCK
-  if (!Object.keys(grouped).length) {
-    historyBody.innerHTML =
-      "<tr><td colspan='8'>No records found</td></tr>";
+    // ✅ ADD THIS BLOCK
+    if (!Object.keys(grouped).length) {
+      historyBody.innerHTML =
+        "<tr><td colspan='8'>No records found</td></tr>";
+    }
+
+  } catch (e) {
+    console.error(e);
+    alert("Failed to fetch history");
   }
-
-  catch (e) {
-  console.error(e);
-  alert("Failed to fetch history");
 }
 
 </script>
@@ -1160,11 +1169,6 @@ function addManualItem() {
 // Back to categories
 function showCategories() {
   renderCategories();
-}
-
-function startApp() {
-  fetchCPCCUsers(); // JSONP
-  fetchMenu();      // JSONP
 }
 
 
