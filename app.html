@@ -8,7 +8,7 @@ if (!sessionStorage.getItem("cpcc_session")) {
 <!DOCTYPE html>
 <html>
 <head>
-<title>LJC CPCC System v3.7.9</title>
+<title>LJC CPCC System v3.9.2</title>
 
 <!-- Inter Font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -348,6 +348,22 @@ body.history-open #historyContainer {
   </div>
 </div>
 
+<div id="lockTimer" style="
+    display:none;
+    position:fixed;
+    top:20px;
+    right:20px;
+    padding:12px 20px;
+    background:#ff5555;
+    color:white;
+    font-size:18px;
+    border-radius:6px;
+    z-index:9999;
+">
+  Locked for <span id="lockMinutes">10</span>:<span id="lockSeconds">00</span>
+</div>
+
+
 <header>
   <img src="https://ljcrestaurant.com/wp-content/uploads/2023/08/LJC_-Logo-in-Green-Box.jpg">
   <span>LJC CPCC System</span>
@@ -547,12 +563,20 @@ function terminalPinCallback(res) {
   }
 
   if (res.valid) {
+   // ✅ Success: hide countdown if visible
+    document.getElementById("lockTimer").style.display = "none";
     startApp();
     return;
   }
 
   if (res.error === "LOCKED") {
     alert(`Too many attempts. Try again in ${res.retryAfterMinutes} minutes.`);
+    return;
+  }
+
+  if (res.error === "LOCKED") {
+    const totalSeconds = res.retryAfterMinutes * 60;
+    startLockCountdown(totalSeconds);
     return;
   }
 
@@ -563,6 +587,39 @@ function terminalPinCallback(res) {
 
   alert("Incorrect PIN");
 }
+
+
+// === new lock countdown function === //
+let lockInterval;
+
+function startLockCountdown(totalSeconds) {
+  const lockDiv = document.getElementById("lockTimer");
+  const minutesSpan = document.getElementById("lockMinutes");
+  const secondsSpan = document.getElementById("lockSeconds");
+
+  // Clear any previous interval
+  if (lockInterval) clearInterval(lockInterval);
+
+  lockDiv.style.display = "block";
+
+  let remaining = totalSeconds;
+
+  lockInterval = setInterval(() => {
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+
+    minutesSpan.textContent = String(minutes).padStart(2, "0");
+    secondsSpan.textContent = String(seconds).padStart(2, "0");
+
+    remaining--;
+
+    if (remaining < 0) {
+      clearInterval(lockInterval);
+      lockDiv.style.display = "none";
+    }
+  }, 1000);
+}
+
 
 
 function validatePin() {
