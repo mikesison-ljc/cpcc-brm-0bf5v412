@@ -466,7 +466,7 @@ body.history-open #historyContainer {
 
 const API_KEY = "CPCC_LJC_2026_PRIVATE_KEY";
 const TERMINAL_URL =
-  "https://script.google.com/macros/s/AKfycbwFE9AxhjeiXTp92mWbVKP3zaqE2lNmcweyP5ZJ5XhshPNmpbjNvTW2x81l1s0hPPLplA/exec";
+  "https://script.google.com/macros/s/AKfycbxfWgT-7vbiA5dSBQyeyUVcE5OWAl3-yP0khWrHM0m-JHWuJROGANPtV_Oy_KNo6X5w8w/exec";
 
 const TERMINAL_ID = "ABE_TRINOMA_POS01";
 const FIXED_OUTLET = "ABE Trinoma";
@@ -518,13 +518,13 @@ function terminalCallback(payload) {
   s.src =
     TERMINAL_URL +
     "?apiKey=" + encodeURIComponent(API_KEY) +
-    "&action=validatePin" +
-    "&terminal=" + encodeURIComponent(TERMINAL_ID) +
-    "&callback=terminalPinCallback";
+    "&action=checkTerminal" +
+    "&callback=terminalCallback";
 
   s.onerror = () => showScreen("LICENSE SERVER UNREACHABLE");
   document.head.appendChild(s);
 })();
+
 </script>
 
 
@@ -579,11 +579,13 @@ function validatePin() {
     "?apiKey=" + encodeURIComponent(API_KEY) +
     "&action=validatePin" +
     "&pin=" + encodeURIComponent(pin) +
+    "&terminal=" + encodeURIComponent(TERMINAL_ID) +
     "&callback=terminalPinCallback";
 
   s.onerror = () => alert("PIN server unreachable");
   document.head.appendChild(s);
 }
+
 
 document
   .getElementById("pinSubmit")
